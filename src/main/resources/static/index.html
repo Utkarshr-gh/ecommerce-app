@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShopEasy</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,sans-serif;background:#f5f6fa;color:#222}
+  header{background:#1f2937;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+  main{max-width:1000px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1fr 300px;gap:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center}
+  .emoji{font-size:48px}
+  button{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+  button:hover{background:#1d4ed8}
+  aside{background:#fff;border-radius:12px;padding:16px;height:fit-content;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .row{display:flex;justify-content:space-between;margin:8px 0}
+  @media(max-width:760px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>🛍️ ShopEasy</h1><span>Cart: <b id="count">0</b></span></header>
+<main>
+  <section><div class="grid" id="products"></div></section>
+  <aside>
+    <h3>Your cart</h3>
+    <div id="cart"><i>Empty</i></div>
+    <hr>
+    <div class="row"><b>Total</b><b id="total">₹0</b></div>
+    <button onclick="checkout()" style="width:100%">Checkout</button>
+  </aside>
+</main>
+<script>
+let products = [], cart = {};
+const fmt = n => '₹' + n.toLocaleString('en-IN');
+
+async function load() {
+  products = await (await fetch('/api/products')).json();
+  document.getElementById('products').innerHTML = products.map(p => `
+    <div class="card">
+      <div class="emoji">${p.emoji}</div>
+      <h4>${p.name}</h4>
+      <p>${p.description}</p>
+      <p><b>${fmt(p.price)}</b></p>
+      <button onclick="add(${p.id})">Add to cart</button>
+    </div>`).join('');
+}
+function add(id) { cart[id] = (cart[id] || 0) + 1; render(); }
+function remove(id) { delete cart[id]; render(); }
+function render() {
+  const items = Object.entries(cart).map(([id, qty]) => ({ p: products.find(x => x.id == id), qty }));
+  document.getElementById('cart').innerHTML = items.length
+    ? items.map(i => `<div class="row"><span>${i.p.name} × ${i.qty}</span>
+        <span>${fmt(i.p.price * i.qty)} <a href="#" onclick="remove(${i.p.id});return false">✕</a></span></div>`).join('')
+    : '<i>Empty</i>';
+  document.getElementById('count').textContent = items.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('total').textContent = fmt(items.reduce((s, i) => s + i.p.price * i.qty, 0));
+}
+function checkout() {
+  if (!Object.keys(cart).length) return alert('Your cart is empty');
+  alert('Order placed! (demo)'); cart = {}; render();
+}
+load();
+</script>
+</body>
+</html>
