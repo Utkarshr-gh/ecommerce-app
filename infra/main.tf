@@ -139,6 +139,7 @@ resource "azurerm_linux_web_app" "app" {
   site_config {
     always_on         = true
     health_check_path = "/actuator/health"
+    health_check_eviction_time_in_min = 5
 
     application_stack {
       java_server         = "JAVA"
