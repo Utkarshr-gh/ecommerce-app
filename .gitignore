@@ -1,6 +1,9 @@
 target/
+.idea/
+.vscode/
 .terraform/
 *.tfstate*
 *.tfvars
-.idea/
-.vscode/
+*.pfx
+*.pem
+*.PublishSettings
